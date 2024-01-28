@@ -135,3 +135,27 @@ FROM
     FirstMemberPurchase
 WHERE
     order_date = first_purchase_date;
+
+-- 7. Which item was purchased just before the customer became a member? A	curry	2021-01-07T00:00:00.000Z, B	sushi	2021-01-04T00:00:00.000Z
+
+WITH BeforeMemberPurchase AS (
+    SELECT
+        s.customer_id,
+        m.product_name,
+        s.order_date,
+        MAX(s.order_date) OVER (PARTITION BY s.customer_id) as before_member_date
+    FROM dannys_diner.sales AS s
+    JOIN dannys_diner.menu AS m
+    ON s.product_id = m.product_id
+    JOIN dannys_diner.members AS mem ON s.customer_id = mem.customer_id
+    WHERE s.order_date <= mem.join_date
+    GROUP BY s.customer_id, m.product_name, s.order_date
+)
+SELECT
+    customer_id,
+    product_name AS first_item_before_membership,
+    order_date
+FROM
+    BeforeMemberPurchase
+WHERE
+    order_date = before_member_date;
