@@ -111,3 +111,27 @@ FROM
     RankedCustomerOrders
 WHERE
     rank = 1;
+
+-- 6. Which item was purchased first by the customer after they became a member? A - curry - 2021-01-07T00:00:00.000Z, B - sushi - 2021-01-11T00:00:00.000Z
+
+WITH FirstMemberPurchase AS (
+    SELECT
+        s.customer_id,
+        m.product_name,
+        s.order_date,
+        MIN(s.order_date) OVER (PARTITION BY s.customer_id) as first_purchase_date
+    FROM dannys_diner.sales AS s
+    JOIN dannys_diner.menu AS m
+    ON s.product_id = m.product_id
+    JOIN dannys_diner.members AS mem ON s.customer_id = mem.customer_id
+    WHERE s.order_date >= mem.join_date
+    GROUP BY s.customer_id, m.product_name, s.order_date
+)
+SELECT
+    customer_id,
+    product_name AS first_item_after_membership,
+    order_date
+FROM
+    FirstMemberPurchase
+WHERE
+    order_date = first_purchase_date;
