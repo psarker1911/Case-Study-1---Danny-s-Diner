@@ -9,7 +9,7 @@
 -- 5. Which item was the most popular for each customer?
 -- 6. Which item was purchased first by the customer after they became a member?
 -- 7. Which item was purchased just before the customer became a member?
--- 8. What is the total items and amount spent for each member before they became a member?
+-- 8. What are the total items and amount spent for each member before they became a member?
 -- 9.  If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
 -- 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
 
@@ -159,3 +159,15 @@ FROM
     BeforeMemberPurchase
 WHERE
     order_date = before_member_date;
+
+-- 8. What are the total items (COUNT) and amount spent (SUM) for each member (GROUP BY member) before they became a member (WHERE order date < join date)?
+
+-- Customer A, 2 items, $25 spent - Customer B, 3 items, $40 spent
+
+SELECT s.customer_id, COUNT(*) AS total_items, SUM(m.price) AS dollar_amount_spent
+FROM dannys_diner.sales AS s
+JOIN dannys_diner.menu AS m ON s.product_id = m.product_id
+JOIN dannys_diner.members AS mem  ON s.customer_id = mem.customer_id
+WHERE s.order_date < mem.join_date
+GROUP BY s.customer_id
+ORDER BY dollar_amount_spent DESC;
