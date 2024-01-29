@@ -186,3 +186,38 @@ FROM dannys_diner.sales AS s
 JOIN dannys_diner.menu AS m ON s.product_id = m.product_id
 GROUP BY s.customer_id
 ORDER BY total_points DESC;
+
+-- 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January? 
+-- Customer A - 1520 points, Customer  B - 1480 points
+
+SELECT s.customer_id,
+	SUM(
+      CASE
+      	WHEN m.product_name = 'sushi' THEN m.price * 10 * 2
+      	WHEN mem.join_date BETWEEN '2021-01-01' AND '2021-01-31' THEN m.price * 10 * 2
+      ELSE m.price * 10
+    END
+    ) AS total_points
+FROM dannys_diner.sales AS s
+JOIN dannys_diner.menu AS m ON s.product_id = m.product_id
+JOIN dannys_diner.members AS mem  ON s.customer_id = mem.customer_id
+GROUP BY s.customer_id
+ORDER BY total_points DESC;
+
+-- Incorrect Query above
+
+-- Correct Query below - Customer A - 1370 points, Customer B - 820 points
+
+SELECT s.customer_id,
+    SUM(
+        CASE
+            WHEN m.product_name = 'sushi' THEN m.price * 10 * 2
+            WHEN s.order_date BETWEEN mem.join_date AND mem.join_date + INTERVAL '6 days' THEN m.price * 10 * 2
+            ELSE m.price * 10
+        END
+    ) AS total_points
+FROM dannys_diner.sales AS s
+JOIN dannys_diner.menu AS m ON s.product_id = m.product_id
+JOIN dannys_diner.members AS mem ON s.customer_id = mem.customer_id
+WHERE s.customer_id IN ('A', 'B') AND s.order_date <= '2021-01-31'
+GROUP BY s.customer_id;
