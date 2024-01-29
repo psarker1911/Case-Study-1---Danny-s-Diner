@@ -173,6 +173,7 @@ GROUP BY s.customer_id
 ORDER BY dollar_amount_spent DESC;
 
 -- 9.  If each $1 spent equates to (ELSE) 10 points and sushi has a 2x points multiplier (CASE) - how many points would each customer have?
+-- Customer B - 940 points, Customer A - 860 points, Customer C - 360 points
 
 SELECT s.customer_id,
 	SUM(
