@@ -171,3 +171,17 @@ JOIN dannys_diner.members AS mem  ON s.customer_id = mem.customer_id
 WHERE s.order_date < mem.join_date
 GROUP BY s.customer_id
 ORDER BY dollar_amount_spent DESC;
+
+-- 9.  If each $1 spent equates to (ELSE) 10 points and sushi has a 2x points multiplier (CASE) - how many points would each customer have?
+
+SELECT s.customer_id,
+	SUM(
+      CASE
+      	WHEN m.product_name = 'sushi' THEN m.price * 10 * 2
+      ELSE m.price * 10
+    END
+    ) AS total_points
+FROM dannys_diner.sales AS s
+JOIN dannys_diner.menu AS m ON s.product_id = m.product_id
+GROUP BY s.customer_id
+ORDER BY total_points DESC;
